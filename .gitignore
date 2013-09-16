@@ -1,5 +1,9 @@
 *.py[cod]
 
+# Data sets:
+docs/*.zip
+docs/*.csv
+
 # C extensions
 *.so
 
