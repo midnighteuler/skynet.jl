@@ -1698,7 +1698,7 @@ init_mathjax();
 <h1 id="overview">Overview</h1>
 </div>
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Describing and implementing multivariate linear regression.<br><br> Definitions:<br> Let the set of \(m\) training examples be \(T = \{(\vec{x_{i}}, y_i)\}\) for \(0 \leq i \leq m - 1\)<br> where \(\vec{x_{i}} \in \mathbb{R}^n\) is the \(i^\text{th}\) training example input, and \(n\) is the number of features, \(y_i \in \mathbb{R}\) is \(i^\text{th}\) is the training output.<br> Let \(x_{i,j}\) denote the \(j^\text{th}\) feature of the \(i^\text{th}\) training example.<br> <br></p>
+<p>Describing and implementing multivariate linear regression in Julia.<br><br> Definitions:<br> Let the set of \(m\) training examples be \(T = \{(\vec{x_{i}}, y_i)\}\) for \(0 \leq i \leq m - 1\)<br> where \(\vec{x_{i}} \in \mathbb{R}^n\) is the \(i^\text{th}\) training example input, and \(n\) is the number of features, \(y_i \in \mathbb{R}\) is \(i^\text{th}\) is the training output.<br> Let \(x_{i,j}\) denote the \(j^\text{th}\) feature of the \(i^\text{th}\) training example.<br> <br></p>
 </div>
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>The linear regression hypothesis function \(h_\vec{\theta} : \mathbb{R}^n \rightarrow \mathbb{R}\) has form:<br> \[h_\vec{\theta}(\vec{x}) = \sum_{i=0}^{n} \theta_{i} x_{i} = \vec{\theta}^{T} \vec{x}\] Where we take \(x_0 = 1\), and let \(\vec{\theta} \in \mathbb{R}^{n+1}\) be the parameter vector.<br> <br></p>
@@ -1742,59 +1742,38 @@ f(\vec{x}_0 + h\vec{\epsilon}) \approx f(\vec{x}_0) + h\vec{\nabla} f(\vec{x}_0)
 <p>Image sources:<br> http://www.themathpage.com/acalc/calc_IMG/060.png<br> http://en.wikipedia.org/wiki/File:Gradient99.png<br></p>
 </div>
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="implementation-and-testing">Implementation and Testing</h1>
+<h1 id="metaprogramming-and-dataframes-formulas">Metaprogramming and DataFrames Formulas</h1>
+</div>
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Julia has &quot;metaprogramming&quot; support: http://docs.julialang.org/en/latest/manual/metaprogramming/<br></p>
+<p>The DataFrames package provides a &quot;Formula&quot; object for use in regression modeling: <a href="https://github.com/JuliaStats/DataFrames.jl/blob/f9556c023db999db39f85261698d5edde4089159/doc/sections/09_formulas.md">DataFrames.Formula</a><br></p>
+The syntax of formulae seems similar to that of <a href="http://science.nature.nps.gov/im/datamgmt/statistics/r/formulas/">R formulae</a>, which is in turn derived from the &quot;S&quot; language:<br>
+<p>
+<p><b>Chambers and Hastie (1993) &quot;Statistical Models in S&quot; is the definitive reference for formulas in S and thus R, although their conception of formulas has been extended for other uses, and there is a package &quot;formula&quot; that defines a new object class Formula that inherits from class formula. At the R command line, ?formula will give you some details.</b><br></p>
+<p>The design notes describe the language of the formulas: <a href="https://github.com/JuliaStats/DataFrames.jl/blob/f9556c023db999db39f85261698d5edde4089159/doc/other/03_design_details.md
+">Design Notes</a><br> And we can just look at the source: https://github.com/JuliaStats/DataFrames.jl/blob/master/src/formula.jl</p>
 </div>
 <div class="cell border-box-sizing code_cell vbox">
 <div class="input hbox">
 <div class="prompt input_prompt">
-In&nbsp;[15]:
+In&nbsp;[1]:
 </div>
 <div class="input_area box-flex1">
-<div class="highlight"><pre><span class="n">function</span> <span class="n">mv_linear_regression</span><span class="p">(</span><span class="n">training_set</span><span class="p">)</span>
-    <span class="c"># Training_set assumed to be a dataframe</span>
-    <span class="c"># For which the last column is the output variable.</span>
-    
-<span class="n">end</span>
-
-<span class="n">function</span> <span class="n">plot_lin_reg</span><span class="p">()</span>
-    <span class="c"># For low dimensional data, plot data and the regression line.</span>
-<span class="n">end</span>
-</pre></div>
-
-</div>
-</div>
-
-<div class="vbox output_wrapper">
-<div class="output vbox">
-
-
-<div class="hbox output_area"><div class="prompt output_prompt">
-    Out[15]:</div>
-<div class="box-flex1 output_subarea output_pyout">
-
-
-<pre>
-# methods for generic function plot_lin_reg
-plot_lin_reg()
-</pre>
-
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell vbox">
-<div class="input hbox">
-<div class="prompt input_prompt">
-In&nbsp;[17]:
-</div>
-<div class="input_area box-flex1">
-<div class="highlight"><pre><span class="n">using</span> <span class="n">RDatasets</span>
+<div class="highlight"><pre><span class="n">using</span> <span class="n">DataFrames</span>
+<span class="n">using</span> <span class="n">RDatasets</span>
 
 <span class="n">iris</span> <span class="o">=</span> <span class="n">data</span><span class="p">(</span><span class="s">&quot;datasets&quot;</span><span class="p">,</span> <span class="s">&quot;iris&quot;</span><span class="p">)</span>
-<span class="n">println</span><span class="p">(</span><span class="s">&quot;Loaded iris dataset.&quot;</span><span class="p">)</span>
+<span class="c"># The DataFrames formula parser seems to take issue with column names having periods</span>
+<span class="c"># and I don&#39;t know if there&#39;s some proper way to escape them--so I&#39;ll just rename them:</span>
+<span class="c"># Uses string.replace: https://github.com/JuliaLang/julia/blob/master/base/string.jl</span>
+<span class="c"># and dataframe.rename: https://github.com/JuliaStats/DataFrames.jl/blob/master/src/dataframe.jl</span>
+<span class="c"># </span>
+<span class="c"># Also note that we need to use &quot;rename!&quot; to operate in place.</span>
+<span class="k">for</span> <span class="n">col_name</span> <span class="ow">in</span> <span class="n">DataFrames</span><span class="o">.</span><span class="n">colnames</span><span class="p">(</span><span class="n">iris</span><span class="p">)</span>
+    <span class="n">DataFrames</span><span class="o">.</span><span class="n">rename</span><span class="err">!</span><span class="p">(</span><span class="n">iris</span><span class="p">,</span> <span class="n">col_name</span><span class="p">,</span> <span class="n">replace</span><span class="p">(</span><span class="n">col_name</span><span class="p">,</span> <span class="s">&quot;\.&quot;</span><span class="p">,</span> <span class="s">&quot;_&quot;</span><span class="p">))</span>
+<span class="n">end</span>
+
+<span class="k">print</span><span class="p">(</span><span class="n">head</span><span class="p">(</span><span class="n">iris</span><span class="p">))</span>
 </pre></div>
 
 </div>
@@ -1807,8 +1786,8 @@ In&nbsp;[17]:
 <div class="hbox output_area"><div class="prompt"></div>
 <div class="box-flex1 output_subarea output_stream output_stdout">
 <pre>
-Loaded iris dataset.
-
+6x6 DataFrame:
+          Sepal_Length Sepal_Width Petal_Length Petal_Width  Species
 </pre>
 </div>
 </div>
@@ -1820,16 +1799,15 @@ Loaded iris dataset.
 <div class="cell border-box-sizing code_cell vbox">
 <div class="input hbox">
 <div class="prompt input_prompt">
-In&nbsp;[20]:
+In&nbsp;[2]:
 </div>
 <div class="input_area box-flex1">
-<div class="highlight"><pre><span class="c"># Let&#39;s predict petal width as a function of sepal.length, sepal.width, and petal.length.</span>
+<div class="highlight"><pre><span class="c"># Suppose we want to predict petal width as a function of sepal.length, sepal.width, and petal.length</span>
+<span class="c"># for the &quot;setosa&quot; species.</span>
 <span class="c"># data_set = iris[:(Species .== &quot;setosa&quot;), :][[&quot;Sepal.Length&quot;, &quot;Sepal.Width&quot;, &quot;Petal.Length&quot;, &quot;Petal.Width&quot;]]</span>
-
-<span class="c"># Let&#39;s predict petal width as a function of sepal.length, sepal.width.</span>
-<span class="n">data_set</span> <span class="o">=</span> <span class="n">iris</span><span class="p">[:(</span><span class="n">Species</span> <span class="o">.==</span> <span class="s">&quot;setosa&quot;</span><span class="p">),</span> <span class="p">:][[</span><span class="s">&quot;Sepal.Length&quot;</span><span class="p">,</span> <span class="s">&quot;Sepal.Width&quot;</span><span class="p">,</span> <span class="s">&quot;Petal.Width&quot;</span><span class="p">]]</span>
-
-<span class="n">head</span><span class="p">(</span><span class="n">data_set</span><span class="p">)</span>
+<span class="n">mf</span> <span class="o">=</span> <span class="n">ModelFrame</span><span class="p">(</span><span class="n">Formula</span><span class="p">(:(</span><span class="n">Petal_Width</span> <span class="o">~</span> <span class="n">Sepal_Length</span> <span class="o">+</span> <span class="n">Sepal_Width</span> <span class="o">+</span> <span class="n">Petal_Length</span><span class="p">)),</span>
+                <span class="n">iris</span><span class="p">[:(</span><span class="n">Species</span> <span class="o">.==</span> <span class="s">&quot;setosa&quot;</span><span class="p">),</span> <span class="p">:])</span>
+<span class="n">mm</span> <span class="o">=</span> <span class="n">ModelMatrix</span><span class="p">(</span><span class="n">mf</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -1839,21 +1817,49 @@ In&nbsp;[20]:
 <div class="output vbox">
 
 
+<div class="hbox output_area"><div class="prompt"></div>
+<div class="box-flex1 output_subarea output_stream output_stderr">
+<pre>
+WARNING: contains(collection, item) is deprecated, use in(item, collection) instead
+ in contains at reduce.jl:238
+
+</pre>
+</div>
+</div>
+
 <div class="hbox output_area"><div class="prompt output_prompt">
-    Out[20]:</div>
+    Out[2]:</div>
 <div class="box-flex1 output_subarea output_pyout">
 
 
 <pre>
-6x3 DataFrame:
-        Sepal.Length Sepal.Width Petal.Width
-[1,]             5.1         3.5         0.2
-[2,]             4.9         3.0         0.2
-[3,]             4.7         3.2         0.2
-[4,]             4.6         3.1         0.2
-[5,]             5.0         3.6         0.2
-[6,]             5.4         3.9         0.4
-
+ModelMatrix{Float64}(50x4 Array{Float64,2}:
+ 1.0  5.1  3.5  1.4
+ 1.0  4.9  3.0  1.4
+ 1.0  4.7  3.2  1.3
+ 1.0  4.6  3.1  1.5
+ 1.0  5.0  3.6  1.4
+ 1.0  5.4  3.9  1.7
+ 1.0  4.6  3.4  1.4
+ 1.0  5.0  3.4  1.5
+ 1.0  4.4  2.9  1.4
+ 1.0  4.9  3.1  1.5
+ 1.0  5.4  3.7  1.5
+ 1.0  4.8  3.4  1.6
+ 1.0  4.8  3.0  1.4
+ ⋮                 
+ 1.0  4.4  3.0  1.3
+ 1.0  5.1  3.4  1.5
+ 1.0  5.0  3.5  1.3
+ 1.0  4.5  2.3  1.3
+ 1.0  4.4  3.2  1.3
+ 1.0  5.0  3.5  1.6
+ 1.0  5.1  3.8  1.9
+ 1.0  4.8  3.0  1.4
+ 1.0  5.1  3.8  1.6
+ 1.0  4.6  3.2  1.4
+ 1.0  5.3  3.7  1.5
+ 1.0  5.0  3.3  1.4,[0,1,2,3])
 </pre>
 
 </div>
@@ -1863,13 +1869,335 @@ In&nbsp;[20]:
 </div>
 
 </div>
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="implementation">Implementation</h1>
+<p>So now we can implement a linear regression model using the dataframes structures explored above.</p>
+</div>
 <div class="cell border-box-sizing code_cell vbox">
 <div class="input hbox">
 <div class="prompt input_prompt">
-In&nbsp;[]:
+In&nbsp;[3]:
 </div>
 <div class="input_area box-flex1">
-<div class="highlight"><pre>
+<div class="highlight"><pre><span class="n">using</span> <span class="n">DataFrames</span>
+<span class="n">using</span> <span class="n">RDatasets</span>
+</pre></div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell vbox">
+<div class="input hbox">
+<div class="prompt input_prompt">
+In&nbsp;[4]:
+</div>
+<div class="input_area box-flex1">
+<div class="highlight"><pre><span class="n">using</span> <span class="n">Base</span><span class="o">.</span><span class="n">Test</span>
+<span class="c"># Get some test dkata:</span>
+<span class="n">iris_test</span> <span class="o">=</span> <span class="n">data</span><span class="p">(</span><span class="s">&quot;datasets&quot;</span><span class="p">,</span> <span class="s">&quot;iris&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">col_name</span> <span class="ow">in</span> <span class="n">DataFrames</span><span class="o">.</span><span class="n">colnames</span><span class="p">(</span><span class="n">iris</span><span class="p">)</span>
+    <span class="n">DataFrames</span><span class="o">.</span><span class="n">rename</span><span class="err">!</span><span class="p">(</span><span class="n">iris_test</span><span class="p">,</span> <span class="n">col_name</span><span class="p">,</span> <span class="n">replace</span><span class="p">(</span><span class="n">col_name</span><span class="p">,</span> <span class="s">&quot;\.&quot;</span><span class="p">,</span> <span class="s">&quot;_&quot;</span><span class="p">))</span>
+<span class="n">end</span>
+</pre></div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell vbox">
+<div class="input hbox">
+<div class="prompt input_prompt">
+In&nbsp;[5]:
+</div>
+<div class="input_area box-flex1">
+<div class="highlight"><pre><span class="c"># Parameters:</span>
+<span class="c">#    training_data is a DataFrames.DataFrame (https://github.com/JuliaStats/DataFrames.jl/blob/master/src/dataframe.jl)</span>
+<span class="c">#    containing the training data.</span>
+<span class="c">#    </span>
+<span class="c">#    reg_formula is a DataFrames.Formula (https://github.com/JuliaStats/DataFrames.jl/blob/master/src/formula.jl)</span>
+<span class="c">#    specifying the linear equation to be fitted from training data.</span>
+<span class="c">#</span>
+<span class="c"># Example:</span>
+<span class="c"># </span>
+<span class="n">function</span> <span class="n">linreg</span><span class="p">(</span><span class="n">training_data</span><span class="p">::</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">reg_formula</span><span class="p">::</span><span class="n">Formula</span><span class="p">,</span>
+                <span class="n">step_size</span><span class="p">::</span><span class="n">Float64</span><span class="p">,</span> <span class="n">threshold</span><span class="p">::</span><span class="n">Float64</span><span class="p">,</span> <span class="n">max_iter</span><span class="p">::</span><span class="n">Float64</span><span class="p">)</span>
+    <span class="n">mf</span> <span class="o">=</span> <span class="n">ModelFrame</span><span class="p">(</span><span class="n">reg_formula</span><span class="p">,</span> <span class="n">training_data</span><span class="p">)</span>
+    <span class="n">mm</span> <span class="o">=</span> <span class="n">ModelMatrix</span><span class="p">(</span><span class="n">mf</span><span class="p">)</span> <span class="c"># mm.m is the matrix data with constant-param 1 column added.</span>
+    
+    <span class="c"># Size of training set</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">size</span><span class="p">(</span><span class="n">training_data</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+    <span class="c"># Number of features</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">size</span><span class="p">(</span><span class="n">mm</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">transpose</span><span class="p">(</span><span class="n">vector</span><span class="p">([</span><span class="mf">1.0</span> <span class="k">for</span> <span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">n</span><span class="p">]))</span>
+    <span class="c">#print(theta)</span>
+    <span class="c"># Hypothesis fcn: (theta_0&#39; * mm.m[i,:])</span>
+    <span class="c"># x_i vector: mm.m[i,:]</span>
+    <span class="c"># y vector: model_response(mf)</span>
+    <span class="n">iter_cnt</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">diff</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">while</span> <span class="n">diff</span> <span class="o">&gt;</span> <span class="n">threshold</span> <span class="o">&amp;&amp;</span> <span class="n">iter_cnt</span> <span class="o">&lt;</span> <span class="n">max_iter</span>
+        <span class="n">grad</span> <span class="o">=</span> <span class="p">[(</span><span class="n">theta</span><span class="s">&#39; * mm.m[i,:] - model_response(mf)[i])[1] * mm.m[i,:] for i=1:m]</span>
+        <span class="n">theta1</span> <span class="o">=</span> <span class="n">theta</span> <span class="o">-</span> <span class="p">(</span><span class="n">step_size</span><span class="o">/</span><span class="n">m</span><span class="p">)</span><span class="o">*</span><span class="nb">sum</span><span class="p">(</span><span class="n">grad</span><span class="p">)</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="nb">sum</span><span class="p">([</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">theta1</span> <span class="o">-</span> <span class="n">theta</span><span class="p">]))</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="n">theta1</span>
+        
+        <span class="n">iter_cnt</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">println</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+        <span class="n">println</span><span class="p">(</span><span class="n">diff</span><span class="p">)</span>
+    <span class="n">end</span>
+<span class="n">end</span>
+
+<span class="c"># 2D test on iris data:</span>
+<span class="n">p</span> <span class="o">=</span> <span class="n">linreg</span><span class="p">(</span><span class="n">iris</span><span class="p">[:(</span><span class="n">Species</span> <span class="o">.==</span> <span class="s">&quot;setosa&quot;</span><span class="p">),</span> <span class="p">:],</span>
+           <span class="n">Formula</span><span class="p">(:(</span><span class="n">Petal_Width</span> <span class="o">~</span> <span class="n">Sepal_Length</span><span class="p">)),</span>
+           <span class="mf">0.01</span><span class="p">,</span>
+           <span class="mf">1e-5</span><span class="p">,</span>
+           <span class="mf">1e5</span><span class="p">)</span>
+<span class="nd">@test</span> <span class="n">false</span>
+
+<span class="c"># Plot result:</span>
+</pre></div>
+
+</div>
+</div>
+
+<div class="vbox output_wrapper">
+<div class="output vbox">
+
+
+<div class="hbox output_area"><div class="prompt"></div>
+<div class="box-flex1 output_subarea output_stream output_stdout">
+<pre>
+.93968	.6988479999999999
+
+0.3071335694840277
+.8841855999999999	.4218529536
+
+0.2824993524974847
+.833130752	.16708230451200007
+
+0.2598358734682798
+.78616029184	-.06724189904895986
+
+0.2389854734123401
+.7429474684928	-.2827553727250431
+
+0.21980310606897285
+.7031916710133761	-.48096297490703976
+
+0.20215532888341486
+.666616337332306	-.6632491753144767
+
+0.18591937471081887
+.6329670303457215	-.8308876860893186
+
+0.17098229778396415
+.6020096679180638	-.9850503224021732
+
+0.1572401880035979
+.5735288944846186	-1.1268151542099993
+
+0.1445974480856024
+.5473265829258491	-1.2571740058731995
+
+0.1329661285364474
+.5232204562917812	-1.3770393558033436
+
+0.12226531583067053
+.5010428197884387	-1.487250684139076
+
+0.11242056953423163
+.48063939420536356	-1.5885803126079499
+
+0.10336340445807737
+.46186824266893445	-1.681738777199314
+
+0.09503081423950879
+.4445987832554197	-1.767379771023369
+
+0.0873648330371372
+.42871088059498613	-1.8461046917414994
+
+0.08031213229035407
+.4140940101473872	-1.9184668252021795
+
+0.07382364973816433
+.40064648933559627	-1.984975194386005
+
+0.06785424811664766
+.38827477018874856	-2.0460981004351244
+
+0.06236240116077921
+.37689278857364866	-2.1022663804003145
+
+0.05730990472627268
+.3664213654877568	-2.1538764043682894
+
+0.05266161102186953
+.3567876562487362	-2.2012928328188264
+
+0.04838518410326533
+.3479246437488373	-2.2448511533933204
+
+0.04445087492776442
+.3397706722489303	-2.284860014721855
+
+0.04083131440484376
+.3322690184690159	-2.3216033735441064
+
+0.03750132300298786
+.32536749699149464	-2.355342470060578
+
+0.03443773558834064
+.31901809723217506	-2.3863176452557315
+
+0.031619240276675085
+.3131766494536011	-2.414750012835273
+
+0.029026230177685297
+.30780251749731297	-2.4408429974084513
+
+0.026640667000278336
+.30285831609752795	-2.4647837496157754
+
+0.02444595557007596
+.2983096508097257	-2.4867444480465135
+
+0.02242682838624937
+.29412487874494764	-2.5068834970027924
+
+0.020569239414658644
+.2902748884453518	-2.525346628442569
+
+0.01886026637853893
+.2867328973697237	-2.5422679157671633
+
+0.017288020867100583
+.28347426558014577	-2.5577707065057904
+
+0.01584156563682111
+.2804763243337341	-2.571968480385327
+
+0.014510838530263876
+.27771821838703536	-2.584965638754501
+
+0.013286582483339983
+.2751807609160725	-2.596858230854141
+
+0.012160281134306264
+.2728463000427867	-2.6077346219858097
+
+0.011124099586840686
+.27069859603936375	-2.617676108226945
+
+0.010170829915449483
+.26872270835621465	-2.6267574819687893
+
+0.009293841034549638
+.26690489168771747	-2.635047552211286
+
+0.008487032583052674
+.2652325003527001	-2.6426096232343834
+
+0.007744792504374043
+.2636939003244841	-2.649501934975633
+
+0.007061958027727883
+.26227838829852534	-2.655778068177582
+
+0.00643377978052116
+.2609761172346433	-2.6614873171233753
+
+0.005855888783853915
+.25977802785587184	-2.6666750325535054
+
+0.005324266103749392
+.2586757856274021	-2.671382937149225
+
+0.004835214949991189
+.25766172277720994	-2.6756494157772868
+
+0.0043853350325658465
+.25672878495503315	-2.6795097825151037
+
+0.003971499002957407
+.2558704821586305	-2.6829965263138953
+
+0.0035908308242973393
+.2550808435859401	-2.6861395370087835
+
+0.0032406859310433363
+.25435437609906486	-2.6889663132480806
+
+0.00291863305616537
+.25368602601113965	-2.691502153788234
+
+0.0026224376227310517
+.2530711439302485	-2.6937703334851753
+
+0.0023500466189030405
+.2525054524158286	-2.6957922652063613
+
+0.0020995749033137544
+.2519850162225623	-2.6975876487898525
+
+0.001869292925983289
+.25150621492475733	-2.6991746080866643
+
+0.001657615906209064
+.25106571773077674	-2.700569817039731
+
+0.0014630945972912237
+.2506604603123146	-2.7017886156765525
+
+0.0012844079150861774
+.2502876234873294	-2.702845116822428
+
+0.0011203579648047998
+.24994461360834305	-2.703752304276634
+
+0.0009698684726036132
+.2496290445196756	-2.704522123134503
+
+0.0008319885357703376
+.24933872095810156	-2.7051655628837428
+
+0.0007059054336856271
+.24907162328145344	-2.705692733853043
+
+</pre>
+</div>
+</div>
+
+<div class="hbox output_area"><div class="prompt"></div>
+<div class="box-flex1 output_subarea output_pyerr">
+<pre>
+test failed: false
+at In[5]:45
+ in error at error.jl:21
+ in default_handler at test.jl:21
+ in do_test at test.jl:38</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Unit/Functional Tests:<br></p>
+<p>http://docs.julialang.org/en/latest/stdlib/test/?highlight=test#Base.Test</p>
+</div>
+<div class="cell border-box-sizing code_cell vbox">
+<div class="input hbox">
+<div class="prompt input_prompt">
+In&nbsp;[6]:
+</div>
+<div class="input_area box-flex1">
+<div class="highlight"><pre><span class="c"># 4D test on iris data:</span>
+<span class="c">#Formula(:(Petal_Width ~ Sepal_Length + Sepal_Width + Petal_Length)), iris[:(Species .== &quot;setosa&quot;), :]</span>
 </pre></div>
 
 </div>
