@@ -1719,7 +1719,7 @@ init_mathjax();
 <p>The idea in gradient descent is similar to the idea in single variable calculus:<br> <img src="images/deriv.png"><br> Where we know that \(\frac{d}{dx} f(x) = 0\) at the extrema (points A and B), and \(\frac{d}{dx} f(x)\) can otherwise be used direct us toward the nearest (local) minimum/maximum (e.g. the slope of the lines at points C, D, E, F).<br><br></p>
 </div>
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>For a multivariate function \(f : \mathbb{R}^n \rightarrow \mathbb{R}\), we use the vector differential, or gradient: \(\vec{\nabla} f(x)\) to guide us to a minimum.<br>For example, in: <img src="images/gradient.png" width="400px"><br> A gradient vector field is shown projected beneath a plot of the function \(f(x,y) = −(\cos^2 x + \cos^2 y)^2.\)</p>
+<p>For a multivariate function \(f : \mathbb{R}^n \rightarrow \mathbb{R}\), we use the vector differential, or gradient: \(\vec{\nabla} f(x)\) to guide us to a minimum.<br>(Mnemonic side note: the latin root &quot;gradi&quot; means &quot;to walk&quot;--with the gradient we walk uphill at the steepest grade.)<br><br> For example, in: <img src="images/gradient.png" width="400px"><br> A gradient vector field is shown projected beneath a plot of the function \(f(x,y) = −(\cos^2 x + \cos^2 y)^2.\)</p>
 </div>
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>Note that the vectors are pointed to the direction of maximum ascent--i.e. away from the minimum, thus if we want to minimize our cost function \(J\) in the linear regression problem, we need to look toward the opposite direction: \(-\vec{\nabla} f(x)\).</p>
